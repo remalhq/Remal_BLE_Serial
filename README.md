@@ -9,8 +9,9 @@ The **Remal BLE Serial** library allows you to use Shabakah (ESP32C3) as a BLE (
 
 ### Compatible Applications
 You can use the following apps to view and interact with the data being sent and received:
-- **iOS**: [BLE Terminal HM-10](https://apps.apple.com/us/app/ble-terminal-hm-10/id1398703795)
-- **Android**: [Serial Bluetooth Terminal](https://play.google.com/store/apps/details?id=de.kai_morich.serial_bluetooth_terminal&hl=en&gl=US)
+- **iOS - Paid**: [BLE Terminal HM-10](https://apps.apple.com/us/app/ble-terminal-hm-10/id1398703795)
+- **iOS - Free**: [Bluefruit Connect](https://apps.apple.com/us/app/bluefruit-connect/id830125974)
+- **Android - Free**: [Serial Bluetooth Terminal](https://play.google.com/store/apps/details?id=de.kai_morich.serial_bluetooth_terminal&hl=en&gl=US)
 
 ## Requirements
 - **Hardware**: Shabakah (ESP32C3) or any other ESP32C3 board.
