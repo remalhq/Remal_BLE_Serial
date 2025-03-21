@@ -43,7 +43,7 @@ class RX_Callbacks: public BLECharacteristicCallbacks
 {
    	void onWrite(BLECharacteristic *pCharacteristic) 
 	{
-   		std::string RX_Value = pCharacteristic->getValue();
+   		std::string RX_Value = pCharacteristic->getValue().c_str();
 
 		/* Store the received data in the RX buffer */
 		BT_RX_Buffer.push_back(RX_Value);

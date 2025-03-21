@@ -28,5 +28,8 @@ You can use the following apps to view and interact with the data being sent and
 We welcome contributions! If you wish to contribute, please submit a pull request with a clear description of your changes.
 
 ## Changelog
+### v1.0.1:
+- Fixed bug in `RX_Callbacks` in the `onWrite()` function
+
 ### v1.0.0 - Git Release:
 - Initial release to GitHub with Arduino IDE support.
