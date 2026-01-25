@@ -123,7 +123,7 @@ Without buffering, each `Send_Data()` would trigger a separate BLE notification,
 We welcome contributions! If you wish to contribute, please submit a pull request with a clear description of your changes.
 
 ## Changelog
-### v2.0.0:
+### v2.0:
 - Migrated from BlueDroid to NimBLE for improved stability and lower memory usage
 - Changed API from Arduino `String` to `const char*` to avoid heap fragmentation
 - Added buffering API (`Begin_Buffer`, `Flush_Buffer`, etc.) for sending complete messages
