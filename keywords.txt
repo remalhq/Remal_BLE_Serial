@@ -5,12 +5,25 @@
 #######################################
 # Datatypes (KEYWORD1)
 #######################################
+BLESerial	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
+Init	KEYWORD2
+IsConnected	KEYWORD2
+Set_RX_BufferSize	KEYWORD2
+Data_Available	KEYWORD2
+Get_Data	KEYWORD2
+Send_Data	KEYWORD2
+Deinit	KEYWORD2
+Begin_Buffer	KEYWORD2
+Flush_Buffer	KEYWORD2
+Is_Buffering	KEYWORD2
+Clear_Buffer	KEYWORD2
+Set_TX_BufferSize	KEYWORD2
+Get_BufferLength	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
 #######################################
-
