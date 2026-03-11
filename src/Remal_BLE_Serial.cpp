@@ -11,6 +11,8 @@
  ***********************************/
 static volatile bool DeviceConnected = false;		// Flag to indicate if a device is connected
 static std::vector<std::string> BT_RX_Buffer;		// RX Buffer
+static size_t BT_RX_BufferMaxEntries = 128;		// Max queued RX messages
+static SemaphoreHandle_t BT_RX_BufferMutex = NULL;	// Protect RX queue shared by BLE callback/tasks
 
 
 /***************************************************************
@@ -46,9 +48,22 @@ class RX_Callbacks: public NimBLECharacteristicCallbacks
 		std::string RX_Value = pCharacteristic->getValue();
 
 		/* Store the received data in the RX buffer */
-		if (!RX_Value.empty())
+		if (!RX_Value.empty() && BT_RX_BufferMutex != NULL)
 		{
-			BT_RX_Buffer.push_back(RX_Value);
+			if (xSemaphoreTake(BT_RX_BufferMutex, 0) == pdTRUE)
+			{
+				if (BT_RX_BufferMaxEntries > 0)
+				{
+					while (BT_RX_Buffer.size() >= BT_RX_BufferMaxEntries)
+					{
+						BT_RX_Buffer.erase(BT_RX_Buffer.begin());
+					}
+
+					BT_RX_Buffer.push_back(RX_Value);
+				}
+
+				xSemaphoreGive(BT_RX_BufferMutex);
+			}
 		}
 	}
 };
@@ -84,9 +99,19 @@ void BLESerial::Init(const char* DeviceName)
 	);
 	pRxCharacteristic->setCallbacks(new RX_Callbacks());	// Set the RX callback
 
-	// Set the size of the RX buffer and clear contents
-	BT_RX_Buffer.reserve(128);
-	BT_RX_Buffer.clear();
+	if (BT_RX_BufferMutex == NULL)
+	{
+		BT_RX_BufferMutex = xSemaphoreCreateMutex();
+	}
+
+	// Initialize RX queue
+	if (BT_RX_BufferMutex != NULL)
+	{
+		xSemaphoreTake(BT_RX_BufferMutex, portMAX_DELAY);
+		BT_RX_Buffer.reserve(BT_RX_BufferMaxEntries);
+		BT_RX_Buffer.clear();
+		xSemaphoreGive(BT_RX_BufferMutex);
+	}
 
 	// Initialize TX buffer
 	TX_Buffer.clear();
@@ -119,24 +144,44 @@ void BLESerial::Set_RX_BufferSize(int Size)
 	{
 		return;
 	}
-	BT_RX_Buffer.resize(Size);
+
+	BT_RX_BufferMaxEntries = (size_t)Size;
+
+	if (BT_RX_BufferMutex != NULL)
+	{
+		xSemaphoreTake(BT_RX_BufferMutex, portMAX_DELAY);
+
+		while (BT_RX_Buffer.size() > BT_RX_BufferMaxEntries)
+		{
+			BT_RX_Buffer.erase(BT_RX_Buffer.begin());
+		}
+
+		BT_RX_Buffer.reserve(BT_RX_BufferMaxEntries);
+		xSemaphoreGive(BT_RX_BufferMutex);
+	}
 }
 
 
 
 int BLESerial::Data_Available()
 {
-	if(DeviceConnected)
+	int AvailableCount = 0;
+
+	if (BT_RX_BufferMutex != NULL)
 	{
-		/* Check if we have any data available to read */
-		if( !BT_RX_Buffer.empty() )
-		{
-			return BT_RX_Buffer.size();
-		}
-		else
-		{
-			return 0;
-		}
+		xSemaphoreTake(BT_RX_BufferMutex, portMAX_DELAY);
+		AvailableCount = (int)BT_RX_Buffer.size();
+		xSemaphoreGive(BT_RX_BufferMutex);
+	}
+
+	if (AvailableCount > 0)
+	{
+		return AvailableCount;
+	}
+
+	if (DeviceConnected)
+	{
+		return 0;
 	}
 	else
 	{
@@ -154,11 +199,20 @@ int BLESerial::Get_Data(char* Buffer, size_t BufferSize)
 		return -1;
 	}
 
+	if (BT_RX_BufferMutex == NULL)
+	{
+		Buffer[0] = '\0';
+		return 0;
+	}
+
 	/* Check if we have any data available to read */
+	xSemaphoreTake(BT_RX_BufferMutex, portMAX_DELAY);
+
 	if( !BT_RX_Buffer.empty() )
 	{
 		std::string DataElement = BT_RX_Buffer.front();		// Get a copy of the first element
 		BT_RX_Buffer.erase(BT_RX_Buffer.begin());			// Remove the first element from the vector
+		xSemaphoreGive(BT_RX_BufferMutex);
 
 		/* Copy to user buffer (with null termination) */
 		size_t CopyLen = DataElement.length();
@@ -173,6 +227,7 @@ int BLESerial::Get_Data(char* Buffer, size_t BufferSize)
 	}
 	else
 	{
+		xSemaphoreGive(BT_RX_BufferMutex);
 		Buffer[0] = '\0';									// Empty string
 		return 0;
 	}
@@ -219,7 +274,12 @@ int BLESerial::Send_Data(const char* DataToSend)
 void BLESerial::Deinit()
 {
 	// Reset the RX buffer
-	BT_RX_Buffer.clear();
+	if (BT_RX_BufferMutex != NULL)
+	{
+		xSemaphoreTake(BT_RX_BufferMutex, portMAX_DELAY);
+		BT_RX_Buffer.clear();
+		xSemaphoreGive(BT_RX_BufferMutex);
+	}
 
 	// Reset TX buffer
 	TX_Buffer.clear();

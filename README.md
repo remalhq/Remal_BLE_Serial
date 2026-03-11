@@ -5,6 +5,8 @@ The **Remal BLE Serial** library allows you to use Shabakah (ESP32C3) as a BLE (
 ### Features
 - **BLE Serial Communication**: Easily send and receive data over BLE using a familiar Serial interface.
 - **Buffered Transmission**: Accumulate multiple data chunks and send as a single BLE notification (ideal for logging).
+- **Bounded RX Queue**: Receive data into a bounded internal queue (default: 128 messages) to prevent unbounded memory growth.
+- **Thread-Safe RX Handling**: RX queue access is protected for callback/task safety.
 - **No Heap Fragmentation**: Uses `const char*` instead of Arduino `String` for long-running stability.
 - **Cross-Platform Compatibility**: Built for Shabakah (ESP32C3) but works with any ESP32C3 board.
 - **NimBLE Backend**: Uses NimBLE for lower memory usage and improved stability over BlueDroid.
@@ -38,7 +40,7 @@ You can use the following apps to view and interact with the data being sent and
 | `Send_Data(const char*)` | Send data to connected device (immediate or buffered) |
 | `Data_Available()` | Returns number of messages in RX buffer, 0 if empty, -1 if disconnected |
 | `Get_Data(char* Buffer, size_t BufferSize)` | Copies earliest message to buffer, returns bytes copied |
-| `Set_RX_BufferSize(Size)` | Set RX buffer size (default: 128) |
+| `Set_RX_BufferSize(Size)` | Set max queued RX messages (default: 128, oldest entries dropped on overflow) |
 | `Deinit()` | Deinitialize BLE and release resources |
 
 ### Buffering Methods (New in v2.0.0)
@@ -123,6 +125,11 @@ Without buffering, each `Send_Data()` would trigger a separate BLE notification,
 We welcome contributions! If you wish to contribute, please submit a pull request with a clear description of your changes.
 
 ## Changelog
+### v2.1:
+- Added bounded RX queue behavior with configurable max message entries via `Set_RX_BufferSize()`
+- Added thread-safe RX queue access between BLE callback and task context
+- Updated RX API documentation to clarify queue semantics and `Data_Available()` return values
+
 ### v2.0:
 - Migrated from BlueDroid to NimBLE for improved stability and lower memory usage
 - Changed API from Arduino `String` to `const char*` to avoid heap fragmentation

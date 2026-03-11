@@ -1,7 +1,7 @@
 /**
  * @file    Remal_BLE_Serial.h
  * @author  Khalid Mansoor AlAwadhi, Remal <Khalid@remal.io>
- * @date    10 August 2024 (Initial release - 24 June 2023)
+ * @date    11 Mar 2026 (Initial release - 24 June 2023)
  *
  * @brief   This library allows you to use Shabakah (ESP32C3) as a BLE (Bluetooth Low Energy) Serial device.
  * 			It abstracts away all the BLE code and allows you to use it as a Serial device.
@@ -63,9 +63,10 @@ class BLESerial
 		bool IsConnected();
 
 		/*
-		 * @brief   Sets the size of the RX buffer
+		 * @brief   Sets the maximum number of RX messages stored in the internal queue
 		 *
-		 * @param   Size: The size of the RX buffer [Default size is 128]
+		 * @param   Size: Maximum number of received messages to keep [Default: 128]
+		 *          If the queue is already larger, oldest messages are dropped.
 		 *
 		 * @return  None
 		 */
@@ -76,7 +77,9 @@ class BLESerial
 		 *
 		 * @param   None
 		 *
-		 * @return  0 -> No data available | -1 -> Error, no device connected | Any number greater than zero -> Number of strings available to read
+		 * @return  >0 -> Number of queued messages available
+		 *           0 -> No queued data and device is connected
+		 *          -1 -> No queued data and no device connected
 		 */
 		int Data_Available();
 
