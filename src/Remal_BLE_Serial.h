@@ -1,7 +1,7 @@
 /**
  * @file    Remal_BLE_Serial.h
  * @author  Khalid Mansoor AlAwadhi, Remal <Khalid@remal.io>
- * @date    11 Mar 2026 (Initial release - 24 June 2023)
+ * @date    24 Mar 2026 (Initial release - 24 June 2023)
  *
  * @brief   This library allows you to use Shabakah (ESP32C3) as a BLE (Bluetooth Low Energy) Serial device.
  * 			It abstracts away all the BLE code and allows you to use it as a Serial device.

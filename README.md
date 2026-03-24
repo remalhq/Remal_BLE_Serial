@@ -125,6 +125,9 @@ Without buffering, each `Send_Data()` would trigger a separate BLE notification,
 We welcome contributions! If you wish to contribute, please submit a pull request with a clear description of your changes.
 
 ## Changelog
+### v2.2:
+- Enhance advertising configuration for iOS compatibility by enabling scan response and returning full device name
+
 ### v2.1:
 - Added bounded RX queue behavior with configurable max message entries via `Set_RX_BufferSize()`
 - Added thread-safe RX queue access between BLE callback and task context
