@@ -121,8 +121,10 @@ void BLESerial::Init(const char* DeviceName)
 	// Start the service
 	pService->start();
 
-	// Configure advertising for iOS compatibility
+	// Configure advertising so the UART service UUID is advertised and the
+	// full device name is returned in the scan response.
 	NimBLEAdvertising *pAdvertising = NimBLEDevice::getAdvertising();
+	pAdvertising->enableScanResponse(true);
 	pAdvertising->addServiceUUID(UART_SERVICE_UUID);	// Required for iOS to discover device
 	pAdvertising->setName(DeviceName);
 	pAdvertising->start();
